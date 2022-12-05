@@ -4,16 +4,16 @@ let user;
 const mEthPrice = 1600;
 const currentYear = 2022;
 
-const contract_address = "0x1703dD6c8F268bcdE3960568Ef7F27A122084d75"; // 따옴표 안에 주소값 복사 붙여넣기
+const contract_address = "0x34AAbc5A206d5fAE8Ff1Dc4DDf106aA39fa188d7"; // 따옴표 안에 주소값 복사 붙여넣기
 
 const logIn = async () => {
   const ID = prompt("choose your ID");
 
   // 개발 시 (ganache)
-  // web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
+  web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:7545'));
 
   // 과제 제출 시 (metamask)
-  web3 = await metamaskRequest();
+  // web3 = await metamaskRequest();
 
   user = await getAccountInfos(Number(ID));
 
@@ -95,6 +95,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('logIn').addEventListener("click", logIn);
   document.getElementById('rentRoom').addEventListener("click", rentRoom);
   document.getElementById('shareRoom').addEventListener("click", shareRoom);
+  document.getElementById('InActive').addEventListener("click", markRoomAsInactive);
+  document.getElementById('ClearAll').addEventListener("click", intializeRoomShare);
 
   checkInDatedom = document.getElementById('checkInDate');
   checkOutDatedom = document.getElementById('checkOutDate');
@@ -160,8 +162,7 @@ const _shareRoom = async (name, location, price) => {
   // 화면을 업데이트 한다.
   var contract = await getRoomShareContract();
   await contract.methods.shareRoom(name, location, price).send({from: user, gas: 3000000})
-    .then((error) => {
-      console.log(error);
+    .then((result) => {
       alert('등록완료!!!');
     }).catch(revert => alert('등록실패!!!'));
 }
@@ -286,14 +287,13 @@ const _rentRoom = async (roomId, checkInDate, checkOutDate, price) => {
   // 단위는 finney = milli Eth (10^15)
   // Room ID에 해당하는 방이 체크인하려는 날짜에 대여되어서 대여되지 않는다면 _recommendDate 함수를 호출한다.
   // 화면을 업데이트 한다.
-  web3.eth.handleRevert = true;
+  // web3.eth.handleRevert = true;
   var contract = await getRoomShareContract();
   await contract.methods.rentRoom(roomId, checkInDate, checkOutDate)
-    .send({from: user, gas: 3000000, value: price*10**15})
+    .send({from: user, gas: 3000000, value: price * 10**15})
       .then((result) => {
-        console.log(result);
         alert("대여완료!!!");
-      }).catch(revert => console.log(revert))
+      }).catch(revert => alert('대여실패!!!'));
 }
 
 const _recommendDate = async (roomId, checkInDate, checkOutDate) => {
@@ -302,10 +302,12 @@ const _recommendDate = async (roomId, checkInDate, checkOutDate) => {
   // checkInDate <= 대여된 체크인 날짜 , 대여된 체크아웃 날짜 < checkOutDate
   // 주어진 헬퍼 함수 dateFromDay 를 이용한다.
   var contract = await getRoomShareContract();
-  var recommend = await contract.methods.recommendDate(roomId, checkInDate, checkOutDate).call();
-  var checkIn = dateFromDay(2022, Number(recommend[0])).toDateString();
-  var checkOut = dateFromDay(2022, Number(recommend[1])).toDateString();
-  alert(checkIn + ' <= , < ' + checkOut);
+  await contract.methods.recommendDate(roomId, checkInDate, checkOutDate).call()
+    .then((result) => {
+      var checkIn = dateFromDay(2022, Number(result[0])).toDateString();
+      var checkOut = dateFromDay(2022, Number(result[1])).toDateString();
+      alert(checkIn + ' <= , < ' + checkOut);
+    }).catch(revert => alert('대여날짜 확인실패!!'));
 }
 
 
@@ -357,14 +359,19 @@ const markRoomAsInactive = async (_roomId) => {
   // optional 1: 예약 비활성화
   // 소유한 방 중에서 선택한 방의 대여 가능 여부를 비활성화 한다.
   var contract = await getRoomShareContract();
-  await contract.methods.markRoomAsInactive(_roomId).call({from: user});
+  await contract.methods.markRoomAsInactive(_roomId).send({from: user, gas: 3000000})
+    .then((result) => alert('비활성화 완료!!'))
+    .catch((revert) => alert('비활성화 실패!!'));
   _updateRooms();
 }
 
 const intializeRoomShare = async (_roomId) => {
   // optional 2: 대여 초기화
   // 소유한 방 중에서 선택한 방의 대여된 일정을 모두 초기화 한다.
+  var day = getDayOfYear(new Date());
   var contract = await getRoomShareContract();
-  await contract.methods.initializeRoomShare(_roomId).call({from: user});
+  await contract.methods.initializeRoomShare(_roomId, day).send({from: user, gas: 3000000})
+    .then((result) => alert('초기화 완료!!'))
+    .catch((revert) => alert('초기화 싶패!!'));
   _updateRents();
 }
