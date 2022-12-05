@@ -39,7 +39,6 @@ contract RoomShare {
     mapping (uint256 => Room) public roomId2room;
     mapping (address => Rent[]) public renter2rent;
     mapping (uint256 => Rent[]) public roomId2rent;
-    // Rent[] rentRoom;
 
     constructor() {
         roomId = 0;

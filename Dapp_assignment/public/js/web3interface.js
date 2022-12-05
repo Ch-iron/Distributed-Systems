@@ -167,14 +167,13 @@ const _shareRoom = async (name, location, price) => {
     }).catch(revert => alert('등록실패!!!'));
 }
 
-
 const _getMyRents = async () => {
   // 내가 대여한 방 리스트를 불러온다.
   var contract = await getRoomShareContract();
-  var myRents = await contract.methods.getMyRents().call({from: user});
+  var myRents = await contract.methods.getMyRents().call({from: user})
+                  .catch(revert => alert('대여 목록 가져오기 실패!!!'));
   return myRents;
 }
-
 
 const displayMyRents = async () => {
   const myRents = await _getMyRents();
@@ -196,7 +195,8 @@ const _getAllRooms = async () => {
   var rooms = [];
   var contract = await getRoomShareContract();
   while(true) {
-    var room = await contract.methods.roomId2room(id).call();
+    var room = await contract.methods.roomId2room(id).call()
+                  .catch(revert => alert('방 목록 가져오기 실패!!!'));
     if (room.name === '') {
       break;
     } else {
@@ -291,9 +291,8 @@ const _rentRoom = async (roomId, checkInDate, checkOutDate, price) => {
   var contract = await getRoomShareContract();
   await contract.methods.rentRoom(roomId, checkInDate, checkOutDate)
     .send({from: user, gas: 3000000, value: price * 10**15})
-      .then((result) => {
-        alert("대여완료!!!");
-      }).catch(revert => alert('대여실패!!!'));
+      .then(result => alert("대여완료!!!"))
+      .catch(revert => alert('대여실패!!!'));
 }
 
 const _recommendDate = async (roomId, checkInDate, checkOutDate) => {
@@ -327,16 +326,18 @@ const getRoomRentHistory = async () => {
   }
 
   var contract = await getRoomShareContract();
-  var gethistory = await contract.methods.getRoomRentHistory(roomId).call();
-  for (var i = 0; i < gethistory.length; i++) {
-    console.log(dateFromDay(2022, Number(gethistory[i].checkInDate)));
-    rentHistory.id = gethistory[i].id;
-    rentHistory.checkInDate = dateFromDay(2022, Number(gethistory[i].checkInDate)).toDateString();
-    rentHistory.checkOutDate = dateFromDay(2022, Number(gethistory[i].checkOutDate)).toDateString();
-    rentHistory.renter = gethistory[i].renter;
-
-    history.push(rentHistory);
-  }
+  await contract.methods.getRoomRentHistory(roomId).call()
+    .then((result) => {
+      for (var i = 0; i < result.length; i++) {
+        rentHistory.id = result[i].id;
+        rentHistory.checkInDate = dateFromDay(2022, Number(result[i].checkInDate)).toDateString();
+        rentHistory.checkOutDate = dateFromDay(2022, Number(result[i].checkOutDate)).toDateString();
+        rentHistory.renter = result[i].renter;
+    
+        history.push(rentHistory);
+      }
+    }).catch(revert => alert('대여 히스토리 가져오기 실패!!!'));
+  
   return history
 }
 
@@ -372,6 +373,6 @@ const intializeRoomShare = async (_roomId) => {
   var contract = await getRoomShareContract();
   await contract.methods.initializeRoomShare(_roomId, day).send({from: user, gas: 3000000})
     .then((result) => alert('초기화 완료!!'))
-    .catch((revert) => alert('초기화 싶패!!'));
+    .catch((revert) => alert('초기화 실패!!'));
   _updateRents();
 }
