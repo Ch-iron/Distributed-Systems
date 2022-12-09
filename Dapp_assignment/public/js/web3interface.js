@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   roomIddom.addEventListener("input", () => {
     roomId = roomIddom.value;
-  })
+  });
 
 	roomsSelect = document.getElementById("rooms-select");
   roomsSelect.addEventListener('change', displayRoomHistory);
