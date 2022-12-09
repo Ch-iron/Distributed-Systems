@@ -39,6 +39,7 @@ contract RoomShare {
     mapping (uint256 => Room) public roomId2room;
     mapping (address => Rent[]) public renter2rent;
     mapping (uint256 => Rent[]) public roomId2rent;
+    // Rent[] rentRoom;
 
     constructor() {
         roomId = 0;
@@ -62,7 +63,7 @@ contract RoomShare {
         * 1. isActive 초기값은 true로 활성화, 함수를 호출한 유저가 방의 소유자이며, 365 크기의 boolean 배열을 생성하여 방 객체를 만든다.
         * 2. 방의 id와 방 객체를 매핑한다.
         */
-        bool[] memory rentable = new bool[](365);
+        bool[] memory rentable = new bool[](50);
         roomId2room[roomId] = Room(
             roomId,
             name,
@@ -94,7 +95,7 @@ contract RoomShare {
         }
         require(roomId2room[_roomId].isActive == true, "not Active room");
         require(isRentDay == false, "already Rented room between given days");
-        require(msg.value == (checkOutDate - checkInDate + 1) * roomId2room[_roomId].price * 10**15, "not exact ETH");
+        require(msg.value == (checkOutDate - checkInDate) * roomId2room[_roomId].price * 10**15, "not exact ETH");
         _sendFunds(roomId2room[_roomId].owner, msg.value);
         _createRent(_roomId, checkInDate, checkOutDate);
     }
@@ -133,10 +134,23 @@ contract RoomShare {
         * checkInDate(체크인하려는 날짜) <= 대여된 체크인 날짜 , 대여된 체크아웃 날짜 < checkOutDate(체크아웃하려는 날짜)
         */
         uint[2] memory result;
-        for (uint i = checkInDate - 1; i < 365; i++) {
-            if (roomId2room[_roomId].isRented[i] == true) {
-                result[0] = i;
-            } else if (roomId2room[_roomId].isRented[i] == false && result[0] <= i) {
+        if(roomId2room[_roomId].isRented[checkInDate - 1] == false) {
+            for(uint i = checkInDate; i < 365; i++) {
+                if(roomId2room[_roomId].isRented[i] == true) {
+                    result[0] = i + 1;
+                    break;
+                }
+            }
+        } else {
+            for(uint i = checkInDate - 1; i >= 0; i--) {
+                if(roomId2room[_roomId].isRented[i] == false) {
+                    result[0] = i + 2;
+                    break;
+                }
+            }
+        }
+        for(uint i = result[0] + 1; i < 365; i++) {
+            if(roomId2room[_roomId].isRented[i] == false) {
                 result[1] = i;
                 break;
             }
