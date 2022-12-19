@@ -4,7 +4,7 @@ let user;
 const mEthPrice = 1600;
 const currentYear = 2022;
 
-const contract_address = "0x3DE6727d70953a832956D563aa418590D6551374"; // 따옴표 안에 주소값 복사 붙여넣기
+const contract_address = "0xDF4C22E7D5417a8a7C4A504939AeED4ceF3B136a"; // 따옴표 안에 주소값 복사 붙여넣기
 
 const logIn = async () => {
   const ID = prompt("choose your ID");
