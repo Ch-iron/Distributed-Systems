@@ -319,7 +319,7 @@ const _recommendDate = async (roomId, checkInDate, checkOutDate) => {
     .then((result) => {
       var checkIn = dateFromDay(2022, Number(result[0])).toDateString();
       var checkOut = dateFromDay(2022, Number(result[1])).toDateString();
-      alert(checkIn + ' <=, <' + checkOut);
+      alert('기존대여날짜: ' + checkIn + ' <=, <' + checkOut);
     }).catch(() => alert('대여날짜 확인실패!!'));
 }
 
