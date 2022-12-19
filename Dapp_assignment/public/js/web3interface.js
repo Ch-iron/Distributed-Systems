@@ -4,7 +4,7 @@ let user;
 const mEthPrice = 1600;
 const currentYear = 2022;
 
-const contract_address = "0xDF4C22E7D5417a8a7C4A504939AeED4ceF3B136a"; // 따옴표 안에 주소값 복사 붙여넣기
+const contract_address = "0x6A8908abCFCBC8efdEB032dD09C91B564d3a9042"; // 따옴표 안에 주소값 복사 붙여넣기
 
 const logIn = async () => {
   const ID = prompt("choose your ID");
@@ -388,10 +388,9 @@ const markRoomAsInactive = async (_roomId) => {
 const intializeRoomShare = async (_roomId) => {
   // optional 2: 대여 초기화
   // 소유한 방 중에서 선택한 방의 대여된 일정을 모두 초기화 한다.
-  var day = getDayOfYear(new Date());
   var contract = await getRoomShareContract();
-  await contract.methods.initializeRoomShare(_roomId, day).estimateGas({from: user, gas: 3000000})
-    .then(await contract.methods.initializeRoomShare(_roomId, day).send({from: user, gas: 3000000})
+  await contract.methods.initializeRoomShare(_roomId).estimateGas({from: user, gas: 3000000})
+    .then(await contract.methods.initializeRoomShare(_roomId).send({from: user, gas: 3000000})
       .then(() => alert('초기화 완료!!'))
       .catch((error) => console.log(error))
     ).catch((error) => {

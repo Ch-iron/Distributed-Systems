@@ -158,9 +158,9 @@ contract RoomShare {
         return result;
     }
 
-    function initializeRoomShare(uint _roomId, uint day) external {
+    function initializeRoomShare(uint _roomId) external {
         require(msg.sender == roomId2room[_roomId].owner, "not your room");
-        for(uint i = 0; i < day; i++) {
+        for(uint i = 0; i < 365; i++) {
             if(roomId2room[_roomId].isRented[i] == true) {
                 roomId2room[_roomId].isRented[i] = false;
             }
