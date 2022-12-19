@@ -63,7 +63,7 @@ contract RoomShare {
         * 1. isActive 초기값은 true로 활성화, 함수를 호출한 유저가 방의 소유자이며, 365 크기의 boolean 배열을 생성하여 방 객체를 만든다.
         * 2. 방의 id와 방 객체를 매핑한다.
         */
-        bool[] memory rentable = new bool[](50);
+        bool[] memory rentable = new bool[](365);
         roomId2room[roomId] = Room(
             roomId,
             name,
